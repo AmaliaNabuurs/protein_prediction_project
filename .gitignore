@@ -7,8 +7,10 @@
 **/._*
 **.log
 **.out
+**.pt
 
 # Ignore files from analysis and data
+data/*
 */data/*
 */analysis/*
 */results/*
