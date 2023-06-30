@@ -15,4 +15,4 @@ apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch "${apptainer_dir}/deepTM
 apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch "${apptainer_dir}/parser_deepTMHMM-1.0.sif" \
     python3 /app/results_parser.py \
         -i "${outdir}/deepTMHMM_${run}/predicted_topologies.3line" \
-        -o "${outdir}/deepTMHMM_${run}/parsed_deepTMHMM_${run}"
+        -o "${outdir}/deepTMHMM_${run}/parsed_deepTMHMM_${run}.tsv"
