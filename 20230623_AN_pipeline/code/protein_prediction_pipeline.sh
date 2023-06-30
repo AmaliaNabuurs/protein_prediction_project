@@ -93,7 +93,7 @@ omegafold_jobid=$(sbatch --parsable \
     --output=${wd}/log/omegafold/%A.out \
     --export=ALL \
     "${scriptdir}/omegafold/omegafold_model2.sh")
-info "OmegaFold jobid: ${omegafold_jobid}"
+echo "OmegaFold jobid: ${omegafold_jobid}"
 
 # Run BLASTp
 
@@ -104,7 +104,7 @@ BLASTp_jobid=$(sbatch --parsable \
     --output=${wd}/log/BLASTp/%A.out \
     --export=ALL \
     "${scriptdir}/BLASTp/BLASTp_remote.sh")
-info "BLASTp jobid: ${BLASTp_jobid}"
+echo "BLASTp jobid: ${BLASTp_jobid}"
 
 # Run DeepTMHMM
 
@@ -115,7 +115,7 @@ deepTMHMM_jobid=$(sbatch --parsable \
     --output=${wd}/log/deepTMHMM/%A.out \
     --export=ALL \
     "${scriptdir}/deepTMHMM/deepTMHMM.sh")
-info "DeepTMHMM jobid: ${deepTMHMM_jobid}"
+echo "DeepTMHMM jobid: ${deepTMHMM_jobid}"
 
 # Step 2: combine the results
 
