@@ -1,56 +1,128 @@
 #!/bin/bash
 
 ######################################################################
-#
-# Authors: A.J.M.nabuurs-3@prinsesmaximacentrum.nl
-# Date:    26-06-2023
+# 
+# Protein prediction project pipeline
+# <short description of pipeline here>
+# 
+# List of output files:
+# OmegaFold:    .pdb file per microprotein sequence
+# BLASTp:       all hits found with BLASTp
+# DeepTMHMM:    3 files containing info about whether there is a trans 
+#               membrane domain present. 
+# 
+# Author:   Amalia Nabuurs (A.J.M.Nabuurs-3@prinsesmaximacentrum.nl)
+# Date:     26-06-2023
 #
 ######################################################################
 
-# $1 is the input fasta file with microprotein amino acid sequence, it will be used as input for all tools
-# $2 is the output directory, in this a directory per tool (has to be present / will be made?!) in which the output (intermediate files)
-#       will be located after the pipeline is ran
-# $3 
+set -uo pipefail
 
-fasta="$1"
-outdir="$2"
-run_identifier="$3"
-output_file="$4"
+function usage() {
+    cat <<EOF
+SYNOPSIS
+  protein_prediction_pipeline.sh [-c <config file>] [-h]
+DESCRIPTION
+  Run the protein prediction pipeline consisting of the following steps:
+  1. Predict 3D structure with OmegaFold
+  2. Check for homology with BLASTp
+  3. Look for transmembrane domains with DeepTMHMM
+OPTIONS
+  -c, --config <file>    Configuration file to use
+  -h, --help             Display this help message
+AUTHOR
+  Amalia Nabuurs
+EOF
+}
 
-# submit BLASTp script
-# $ = input fasta
-# $ = output.tsv of blast
-# $ = output.tsv parsed
+# Parse command-line arguments
+while [[ $# -gt 0 ]]
+do
+key="$1"
 
-omegafold_id=$(sbatch --parsable /hpc/pmc_vanheesch/projects/Amalia/20230503_AN_peptide_prediction_project/20230623_AN_pipeline/code/omegafold/omegafold_model2.sh \
-    "$fasta" \
-    "$outdir/omegafold" \
-    "parsed_omegafold_$run_identifier.tsv")
+case $key in
+    -c|--config)
+    CONFIG="$2"
+    shift
+    shift
+    ;;
+    -h|--help)
+    usage
+    exit
+    ;;
+    "")
+    echo "Error: no option provided"
+    usage
+    exit 1
+    ;;
+    *)
+    echo "Unknown option: $key"
+    usage
+    exit 1
+    ;;
+esac
+done
 
-# submit OmegaFold script
-# $ = input fasta
-# $ = output dir
-# $ = output.tsv parsed
+# Check that configuration file is provided
+if [[ -z ${CONFIG+x} ]]; then 
+    echo "Error: no configuration file provided"
+    usage
+    exit 1
+fi
 
-BLASTp_id=$(sbatch --parsable /hpc/pmc_vanheesch/projects/Amalia/20230503_AN_peptide_prediction_project/20230623_AN_pipeline/code/BLASTp/BLASTp_remote.sh \
-    "$fasta" \
-    "$outdir/BLASTp/BLASTp_$run_identifier.out" \
-    "$outdir/BLASTp/parsed_BLASTp_$run_identifier.tsv")
+# Load configuration variables
+source $CONFIG
 
-# submit deepTMHMM script
-# $ = input fasta
-# $ = output dir
-# $ = output.tsv parsed
 
-deepTMHMM_id=$(sbatch --parsable /hpc/pmc_vanheesch/projects/Amalia/20230503_AN_peptide_prediction_project/20230623_AN_pipeline/code/deepTMHMM/deepTMHMM.sh \
-    "$fasta" \
-    "$outdir/deepTMHMM" \
-    "parsed_deepTMHMM_$run_identifier.tsv")
+# Create a unique prefix for the names for this run of the pipeline
+# This makes sure that runs can be identified
+export run=$(uuidgen | tr '-' ' ' | awk '{print $1}')
 
-# submit script that merges all output files together into a big file
-# $ = all output.tsv parsed
-# $ = out_file.tsv
+######################################################################
 
-sbatch --dependency=afterok:$omegafold_id,$BLASTp_id,$deepTMHMM_id /hpc/pmc_vanheesch/projects/Amalia/20230503_AN_peptide_prediction_project/20230623_AN_pipeline/code/merge_files.sh \
-    "$outdir/omegafold/parsed_omegafold_$run_identifier.tsv" "$outdir/BLASTp/parsed_BLASTp_$run_identifier.tsv" "$outdir/deepTMHMM/parsed_deepTMHMM_$run_identifier.tsv" \
-    "$outdir/$output_file"
+# Step 1: running of several tools
+# Run OmegaFold
+
+omegafold_jobid=$(sbatch --parsable \
+    -p gpu \
+    -c 2 \
+    --gpus-per-node=1 \
+    --mem=15G \
+    --time=1:00:00 \
+    --job-name=${run}.omegafold \
+    --output=${wd}/log/omegafold/%A.out \
+    --export=ALL \
+    "${scriptdir}/omegafold/omegafold_model2.sh")
+info "OmegaFold jobid: ${omegafold_jobid}"
+
+# Run BLASTp
+
+BLASTp_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.BLASTp \
+    --output=${wd}/log/BLASTp/%A.out \
+    --export=ALL \
+    "${scriptdir}/BLASTp/BLASTp_remote.sh")
+info "BLASTp jobid: ${BLASTp_jobid}"
+
+# Run DeepTMHMM
+
+deepTMHMM_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.deepTMHMM \
+    --output=${wd}/log/deepTMHMM/%A.out \
+    --export=ALL \
+    "${scriptdir}/deepTMHMM/deepTMHMM.sh")
+info "DeepTMHMM jobid: ${deepTMHMM_jobid}"
+
+# Step 2: combine the results
+
+sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid} \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.merge_files \
+    --output=${wd}/log/%A.out \
+    --export=ALL \
+    "${scriptdir}/merge_files.sh"
