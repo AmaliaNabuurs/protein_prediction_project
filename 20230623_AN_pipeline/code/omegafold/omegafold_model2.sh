@@ -4,7 +4,7 @@
 
 mkdir "${outdir}/omegafold_${run}" || { echo "Error: Failed to create the output directory."; exit 1; }
 
-apptainer exec -B /hpc:/hpc "${apptainer_dir}/omegafold-1.0.0.sif" \
+apptainer exec --nv -B /hpc:/hpc "${apptainer_dir}/omegafold-1.0.0.sif" \
     omegafold \
         --weights_file=${model_omegafold} \
         --model 2 \

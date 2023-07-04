@@ -4,7 +4,13 @@
 # 
 # Protein prediction project pipeline
 # <short description of pipeline here>
-# 
+#
+# Resources 
+# Resources need to be alted depending on the size of the input fasta
+# the BLASTp, deepTMHMM and merging of files don't need a lot of resources
+# so this can stay the same. However every protein in the fasta files 
+# takes 1 to 5 mins and around 1 GB memory, this had to be altered. 
+#
 # List of output files:
 # OmegaFold:    .pdb file per microprotein sequence
 # BLASTp:       all hits found with BLASTp
@@ -16,7 +22,7 @@
 #
 ######################################################################
 
-set -uo pipefail
+set -euo pipefail
 
 function usage() {
     cat <<EOF
