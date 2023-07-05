@@ -123,9 +123,18 @@ deepTMHMM_jobid=$(sbatch --parsable \
     "${scriptdir}/deepTMHMM/deepTMHMM.sh")
 echo "DeepTMHMM jobid: ${deepTMHMM_jobid}"
 
+signalp6_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.signalP6 \
+    --output=${wd}/log/signalP6.%A.out \
+    --export=ALL \
+    "${scriptdir}/signalp6_fast/signalp6_fast.sh")
+echo "signalP6 jobid: ${signalp6_jobid}"
+
 # Step 2: combine the results
 
-sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid} \
+sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid} \
     --mem=10G \
     --time=1:00:00 \
     --job-name=${run}.merge_files \
