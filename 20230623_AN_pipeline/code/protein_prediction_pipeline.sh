@@ -3,19 +3,24 @@
 ######################################################################
 # 
 # Protein prediction project pipeline
-# <short description of pipeline here>
+# Pipeline that predicts several characteristics of a microprotein and
+# puts these results in a .tsv file which can be examined. Currenly the 
+# pipeline excists of 4 tools; OmegaFold, BLASTp, DeepTMHMM and SignalP. 
 #
 # Resources 
 # Resources need to be alted depending on the size of the input fasta
-# the BLASTp, deepTMHMM and merging of files don't need a lot of resources
-# so this can stay the same. However every protein in the fasta files 
-# takes 1 to 5 mins and around 1 GB memory, this had to be altered. 
+# the BLASTp, deepTMHMM, SignalP 6.0 and merging of files don't need a lot of resources
+# so this can stay the same. For OmegaFold on a GPU all 8 microproteins 
+# can be ran in under a minute but need 5Gb of memory -> adjust accordingly.
 #
-# List of output files:
+# List of output files per tool:
 # OmegaFold:    .pdb file per microprotein sequence
 # BLASTp:       all hits found with BLASTp
 # DeepTMHMM:    3 files containing info about whether there is a trans 
 #               membrane domain present. 
+# SignalP 6.0:  .txt files per protein for a plot. For every amino acid
+#               a score is predicted whether there is a signal present.
+#               And a overview file of all the proteins and signals.
 # 
 # Author:   Amalia Nabuurs (A.J.M.Nabuurs-3@prinsesmaximacentrum.nl)
 # Date:     26-06-2023
@@ -89,6 +94,7 @@ export run=$(uuidgen | tr '-' ' ' | awk '{print $1}')
 # Step 1: running of several tools
 # Run OmegaFold
 
+mkdir -p ${wd}/log/omegafold/%A.out
 omegafold_jobid=$(sbatch --parsable \
     -p gpu \
     -c 2 \
@@ -103,6 +109,7 @@ echo "OmegaFold jobid: ${omegafold_jobid}"
 
 # Run BLASTp
 
+mkdir -p ${wd}/log/BLASTp/%A.out
 BLASTp_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -114,6 +121,7 @@ echo "BLASTp jobid: ${BLASTp_jobid}"
 
 # Run DeepTMHMM
 
+mkdir -p ${wd}/log/deepTMHMM/%A.out
 deepTMHMM_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -123,11 +131,14 @@ deepTMHMM_jobid=$(sbatch --parsable \
     "${scriptdir}/deepTMHMM/deepTMHMM.sh")
 echo "DeepTMHMM jobid: ${deepTMHMM_jobid}"
 
+# Run SignalP 6.0
+
+mkdir -p ${wd}/log/signalP6/%A.out
 signalp6_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
     --job-name=${run}.signalP6 \
-    --output=${wd}/log/signalP6.%A.out \
+    --output=${wd}/log/signalP6/%A.out \
     --export=ALL \
     "${scriptdir}/signalp6_fast/signalp6_fast.sh")
 echo "signalP6 jobid: ${signalp6_jobid}"
