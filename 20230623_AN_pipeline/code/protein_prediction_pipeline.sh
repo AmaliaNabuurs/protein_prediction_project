@@ -143,9 +143,22 @@ signalp6_jobid=$(sbatch --parsable \
     "${scriptdir}/signalp6_fast/signalp6_fast.sh")
 echo "signalP6 jobid: ${signalp6_jobid}"
 
+# Run IUPred3
+
+mkdir -p -p ${wd}/log/IUPred3/%A.out
+iupred3_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.IUPred3 \
+    --gres=tmpspace:10G \
+    --output=${wd}/log/IUPred3/%A.out \
+    --export=ALL \
+    "${scriptdir}/iupred3/iupred3.sh")
+echo "IUPred3 jobid: ${iupred3_jobid}"
+
 # Step 2: combine the results
 
-sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid} \
+sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid},${iupred3_jobid} \
     --mem=10G \
     --time=1:00:00 \
     --job-name=${run}.merge_files \
