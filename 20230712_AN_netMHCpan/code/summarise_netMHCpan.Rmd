@@ -1,0 +1,58 @@
+---
+title: "NetMHCPan parser"
+output: html_document
+date: "2023-07-18"
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(magrittr)
+```
+
+## Alter tables
+
+
+```{r load data, include = FALSE}
+netMHCpan_output <- read.table("protein_prediction_project/20230712_AN_netMHCpan/code/test.tsv", sep = '\t', 
+                           header = TRUE)
+
+```
+
+
+```{r}
+filtered_netMHCpan <- netMHCpan_output %>%
+  filter(rowSums(select(., starts_with("HLA")) < 2, na.rm = TRUE) >= 1)
+```
+
+
+```{r}
+netMHCpan_overview <- filtered_netMHCpan %>%
+  group_by(ID) %>%
+  summarize(Peptides = paste(trimws(Peptide), collapse = ","))
+```
+
+```{r}
+filtered_netMHCpan_strongbinders <- netMHCpan_output %>%
+  filter(rowSums(select(., starts_with("HLA")) < 0.5) >= 1)
+
+netMHCpan_overview_SB <- filtered_netMHCpan_strongbinders %>%
+  group_by(ID) %>%
+  summarize(Peptides_SB = paste(trimws(Peptide), collapse = ","))
+```
+
+
+```{r}
+filtered_netMHCpan_weakbinders <- netMHCpan_output %>%
+  filter(rowSums(select(., starts_with("HLA")) > 0.5 & select(., starts_with("HLA")) < 2, na.rm = TRUE) >= 1)
+
+netMHCpan_overview_WB <- filtered_netMHCpan_weakbinders %>%
+  group_by(ID) %>%
+  summarize(Peptides_WB = paste(trimws(Peptide), collapse = ","))
+```
+
+```{r}
+SB_WB_netMHCpan <- merge(netMHCpan_overview_SB, netMHCpan_overview_WB, by = "ID", all = TRUE)
+```
+
+
+
