@@ -1,5 +1,7 @@
 #!/bin/bash
 
+mkdir -p "${outdir}/iupred3_${run}/per_protein"
+
 # Read the FASTA file line by line
 while IFS= read -r line
 do
@@ -18,7 +20,7 @@ do
     
     rm "$tmp_file"
   fi
-done < "${fasta_file}"
+done < "${input_fasta}"
 
 
 # create file with paths to the created pdb files
