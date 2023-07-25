@@ -16,6 +16,7 @@ export apptainer_dir="/hpc/local/Rocky8/pmc_vanheesch/singularity_images"
 #######################
 
 export model_omegafold="${project_data_folder}/omegafold_model/model2.pt"
+export elm_classes="${project_data_folder}/elm_classes.tsv"
 
 #######################
 ### Module versions ###

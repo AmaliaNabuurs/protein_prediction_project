@@ -94,7 +94,7 @@ export run=$(uuidgen | tr '-' ' ' | awk '{print $1}')
 # Step 1: running of several tools
 # Run OmegaFold
 
-mkdir -p ${wd}/log/omegafold/%A.out
+mkdir -p ${wd}/log/omegafold
 omegafold_jobid=$(sbatch --parsable \
     -p gpu \
     -c 2 \
@@ -109,7 +109,7 @@ echo "OmegaFold jobid: ${omegafold_jobid}"
 
 # Run BLASTp
 
-mkdir -p ${wd}/log/BLASTp/%A.out
+mkdir -p ${wd}/log/BLASTp
 BLASTp_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -121,7 +121,7 @@ echo "BLASTp jobid: ${BLASTp_jobid}"
 
 # Run DeepTMHMM
 
-mkdir -p ${wd}/log/deepTMHMM/%A.out
+mkdir -p ${wd}/log/deepTMHMM
 deepTMHMM_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -133,7 +133,7 @@ echo "DeepTMHMM jobid: ${deepTMHMM_jobid}"
 
 # Run SignalP 6.0
 
-mkdir -p ${wd}/log/signalP6/%A.out
+mkdir -p ${wd}/log/signalP6
 signalp6_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -145,7 +145,7 @@ echo "signalP6 jobid: ${signalp6_jobid}"
 
 # Run IUPred3
 
-mkdir -p -p ${wd}/log/IUPred3/%A.out
+mkdir -p ${wd}/log/IUPred3
 iupred3_jobid=$(sbatch --parsable \
     --mem=10G \
     --time=1:00:00 \
@@ -156,9 +156,47 @@ iupred3_jobid=$(sbatch --parsable \
     "${scriptdir}/iupred3/iupred3.sh")
 echo "IUPred3 jobid: ${iupred3_jobid}"
 
+# Run characteristics R script
+
+mkdir -p ${wd}/log/characteristics
+characteristics_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.characteristics \
+    --gres=tmpspace:10G \
+    --output=${wd}/log/characteristics/%A.out \
+    --export=ALL \
+    "${scriptdir}/characteristics/calculate_characteristics.sh")
+echo "characteristics jobid: ${characteristics_jobid}"
+
+# Run netMHCpan
+mkdir -p ${wd}/log/netMHCpan
+netMHCpan_jobid=$(sbatch --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.netMHCpan \
+    --gres=tmpspace:10G \
+    --output=${wd}/log/netMHCpan/%A.out \
+    --export=ALL \
+    "${scriptdir}/netMHCpan/netMHCpan_script.sh")
+echo "netMHCpan jobid: ${netMHCpan_jobid}"
+
+# Run ELM search after IUPred3 is finished
+mkdir -p ${wd}/log/ELM_search
+ELM_search_jobid=$(sbatch --dependency=afterok:${iupred3_jobid} \
+    --parsable \
+    --mem=10G \
+    --time=1:00:00 \
+    --job-name=${run}.ELM_search \
+    --gres=tmpspace:10G \
+    --output=${wd}/log/ELM_search/%A.out \
+    --export=ALL \
+    "${scriptdir}/ELM_search/ELM_SLiM_search.sh")
+echo "netMHCpan jobid: ${ELM_search_jobid}"
+
 # Step 2: combine the results
 
-sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid},${iupred3_jobid} \
+sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid},${iupred3_jobid},${characteristics_jobid},${netMHCpan_jobid} \
     --mem=10G \
     --time=1:00:00 \
     --job-name=${run}.merge_files \
