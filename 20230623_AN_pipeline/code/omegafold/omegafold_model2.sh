@@ -27,10 +27,13 @@ while IFS= read -r line
 do
   # Calculate the average of the 11th column using awk
   average=$(awk '{ total += $11; count++ } END { print total/count }' $line)
+
+  # Extract all the values in the 11th column separated by commas
+  values=$(awk '{ printf (NR>1 ? "," : "") $11 }' "$line")
   
   # Extract the protein_id from the line
   protein_id=$(basename $line | sed 's/\.pdb$//')
   
   # Append the protein_id and average to the output file
-  echo -e "${protein_id}\t${average}" >> "${output_file}" 
+  echo -e "${protein_id}\t${average}\t${values}" >> "${output_file}" 
 done < "${outdir}/omegafold_${run}/overview_pdb_files.txt"
