@@ -1,6 +1,7 @@
 library(Peptides)
 library(dplyr)
 library(Biostrings)
+library(magrittr)
 
 # define the arguments needed to run the script
 args <- commandArgs(trailingOnly = TRUE)
@@ -15,7 +16,7 @@ input_file <- args[1]
 output_file <- args[2]
 
 # fasta to table
-fasta_sequences <- readDNAStringSet(input_file)
+fasta_sequences <- readAAStringSet('/hpc/pmc_vanheesch/projects/Amalia/protein_prediction_project/20230721_AN_characteristics/data/20230306_NBL_peptide_seq.fasta')
 
 # Extract protein IDs and sequences
 protein_ids <- names(fasta_sequences)

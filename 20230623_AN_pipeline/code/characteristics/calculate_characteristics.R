@@ -15,7 +15,7 @@ input_file <- args[1]
 output_file <- args[2]
 
 # fasta to table
-fasta_sequences <- readDNAStringSet(input_file)
+fasta_sequences <- readAAStringSet(input_file)
 
 # Extract protein IDs and sequences
 protein_ids <- names(fasta_sequences)
