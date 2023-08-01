@@ -21,6 +21,9 @@
 # SignalP 6.0:  .txt files per protein for a plot. For every amino acid
 #               a score is predicted whether there is a signal present.
 #               And a overview file of all the proteins and signals.
+# IUPred 3.0:   -
+# Characteristics:  -
+# NetMHCpan:    -
 # 
 # Author:   Amalia Nabuurs (A.J.M.Nabuurs-3@prinsesmaximacentrum.nl)
 # Date:     26-06-2023
