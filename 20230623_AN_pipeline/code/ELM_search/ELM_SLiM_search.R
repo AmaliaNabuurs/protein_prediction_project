@@ -142,8 +142,8 @@ for (i in 1:nrow(disordered_parts)) {
 # Group the results by Protein_Name
 summary_table_disordered_parts <- regex_disordered_parts %>%
   group_by(Protein_Name) %>%
-  summarize(Regex_Names_DP = paste(unique(Regex_Name_DP), collapse = ", "),
-            Sequences_DP = paste(unique(Sequences_DP), collapse = ", "),
+  summarize(Regex_Names_DP = paste(unique(Regex_Name_DP), collapse = ","),
+            Sequences_DP = paste(unique(Sequences_DP), collapse = ","),
             Regex_Count_DP = n_distinct(Regex_Name_DP))
 
 # Get the unique Protein_Name values from the FASTA file
