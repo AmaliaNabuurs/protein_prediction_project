@@ -38,10 +38,13 @@ while IFS= read -r line
 do
   # Calculate the average of the 11th column using awk
   average=$(awk 'NR > 12 { total += $3; count++ } END { print total/count }' $line)
+
+  # Extract all the values in the 3rd column separated by commas
+  values=$(awk 'NR > 12 { printf (NR>13 ? "," : "") $3 }' "$line")
   
   # Extract the protein_id from the line
   protein_id=$(basename $line | sed 's/\.txt$//')
   
   # Append the protein_id and average to the output file
-  echo -e "${protein_id}\t${average}" >> "${output_file}" 
+  echo -e "${protein_id}\t${average}\t${values}" >> "${output_file}" 
 done < "${outdir}/iupred3_${run}/overview_iupred3_files.tsv"
