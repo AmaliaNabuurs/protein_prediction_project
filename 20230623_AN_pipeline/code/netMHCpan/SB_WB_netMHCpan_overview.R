@@ -22,7 +22,7 @@ filtered_netMHCpan_strongbinders <- netMHCpan_output %>%
 netMHCpan_overview_SB <- filtered_netMHCpan_strongbinders %>%
   group_by(ID) %>%
   summarize(Peptides_SB = paste(trimws(Peptide), collapse = ","),
-  Number_SB = n())
+            Number_SB = n())
 
 # Group and summarize for weak binders
 filtered_netMHCpan_weakbinders <- netMHCpan_output %>%
@@ -31,10 +31,15 @@ filtered_netMHCpan_weakbinders <- netMHCpan_output %>%
 netMHCpan_overview_WB <- filtered_netMHCpan_weakbinders %>%
   group_by(ID) %>%
   summarize(Peptides_WB = paste(trimws(Peptide), collapse = ","),
-  Number_WB = n())
+            Number_WB = n())
 
-# Merge strong and weak binders data
-SB_WB_netMHCpan <- merge(netMHCpan_overview_SB, netMHCpan_overview_WB, by = "ID", all = TRUE)
+# Create a data frame with all protein IDs
+all_proteins <- data.frame(ID = unique(netMHCpan_output$ID))
+
+# Left join with summarized data for strong and weak binders
+SB_WB_netMHCpan <- left_join(all_proteins, netMHCpan_overview_SB, by = "ID") %>%
+  left_join(netMHCpan_overview_WB, by = "ID") %>%
+  replace(is.na(.), "")
 
 # Rename ID column of protein_id
 SB_WB_netMHCpan %<>%
