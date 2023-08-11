@@ -31,7 +31,7 @@ ls -1 ${outdir}/iupred3_${run}/per_protein/*.txt > "${outdir}/iupred3_${run}/ove
 output_file="${outdir}/iupred3_${run}/parsed_iupred3_${run}.tsv"
 
 # Add the header to the output file
-echo -e "protein_id\tmean_iupred3_score" > "${output_file}"
+echo -e "protein_id\tmean_iupred3_score\tvalue_per_residue_iupred3" > "${output_file}"
 
 # Read each line from the file specified in $2/overview_pdb_files.txt
 while IFS= read -r line
