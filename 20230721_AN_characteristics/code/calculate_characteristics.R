@@ -16,7 +16,7 @@ input_file <- args[1]
 output_file <- args[2]
 
 # fasta to table
-fasta_sequences <- readAAStringSet('/hpc/pmc_vanheesch/projects/Amalia/protein_prediction_project/20230721_AN_characteristics/data/20230306_NBL_peptide_seq.fasta')
+fasta_sequences <- readAAStringSet(input_file)
 
 # Extract protein IDs and sequences
 protein_ids <- names(fasta_sequences)
