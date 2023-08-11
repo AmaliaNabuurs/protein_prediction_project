@@ -26,7 +26,7 @@ sed '1i qseqid  sseqid  pident  length  mismatch    gapopen qstart  qend    ssta
 
 # script to iterate over results to find proteins that do have and that do not have results
 
-apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch "${apptainer_dir}/blast_parser_python-1.0.sif" \
+apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch "${apptainer_dir}/blast_parser_python-2.0.sif" \
     python3 /app/blastout_to_list.py \
         -b "${outdir}/BLASTp_${run}/BLASTp_${run}.out" \
         -f "${input_fasta}" \
