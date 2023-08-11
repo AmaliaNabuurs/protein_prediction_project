@@ -20,7 +20,7 @@ ls -1 ${outdir}/omegafold_${run}/pdb_files/*.pdb > "${outdir}/omegafold_${run}/o
 output_file="${outdir}/omegafold_${run}/parsed_omegafold_${run}.tsv"
 
 # Add the header to the output file
-echo -e "protein_id\tmean_pLDDT_OmegaFold" > "${output_file}"
+echo -e "protein_id\tmean_pLDDT_OmegaFold\tvalue_per_residue_OmegaFold" > "${output_file}"
 
 # Read each line from the file specified in $2/overview_pdb_files.txt
 while IFS= read -r line
