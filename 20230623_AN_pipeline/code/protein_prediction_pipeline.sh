@@ -24,6 +24,7 @@
 # IUPred 3.0:   -
 # Characteristics:  -
 # NetMHCpan:    -
+# ELM search:   -
 # 
 # Author:   Amalia Nabuurs (A.J.M.Nabuurs-3@prinsesmaximacentrum.nl)
 # Date:     26-06-2023
@@ -87,7 +88,6 @@ fi
 # Load configuration variables
 source $CONFIG
 
-
 # Create a unique prefix for the names for this run of the pipeline
 # This makes sure that runs can be identified
 export run=$(uuidgen | tr '-' ' ' | awk '{print $1}')
@@ -102,32 +102,20 @@ omegafold_jobid=$(sbatch --parsable \
     -p gpu \
     -c 2 \
     --gpus-per-node=1 \
-    --mem=15G \
-    --time=1:00:00 \
+    --mem=80G \
+    --time=10:00:00 \
     --job-name=${run}.omegafold \
     --output=${wd}/log/omegafold/%A.out \
     --export=ALL \
     "${scriptdir}/omegafold/omegafold_model2.sh")
 echo "OmegaFold jobid: ${omegafold_jobid}"
 
-# Run BLASTp
-
-mkdir -p ${wd}/log/BLASTp
-BLASTp_jobid=$(sbatch --parsable \
-    --mem=10G \
-    --time=1:00:00 \
-    --job-name=${run}.BLASTp \
-    --output=${wd}/log/BLASTp/%A.out \
-    --export=ALL \
-    "${scriptdir}/BLASTp/BLASTp_remote.sh")
-echo "BLASTp jobid: ${BLASTp_jobid}"
-
 # Run DeepTMHMM
 
 mkdir -p ${wd}/log/deepTMHMM
 deepTMHMM_jobid=$(sbatch --parsable \
     --mem=10G \
-    --time=1:00:00 \
+    --time=4:00:00 \
     --job-name=${run}.deepTMHMM \
     --output=${wd}/log/deepTMHMM/%A.out \
     --export=ALL \
@@ -139,7 +127,7 @@ echo "DeepTMHMM jobid: ${deepTMHMM_jobid}"
 mkdir -p ${wd}/log/signalP6
 signalp6_jobid=$(sbatch --parsable \
     --mem=10G \
-    --time=1:00:00 \
+    --time=2:00:00 \
     --job-name=${run}.signalP6 \
     --output=${wd}/log/signalP6/%A.out \
     --export=ALL \
@@ -151,7 +139,7 @@ echo "signalP6 jobid: ${signalp6_jobid}"
 mkdir -p ${wd}/log/IUPred3
 iupred3_jobid=$(sbatch --parsable \
     --mem=10G \
-    --time=1:00:00 \
+    --time=3:00:00 \
     --job-name=${run}.IUPred3 \
     --gres=tmpspace:10G \
     --output=${wd}/log/IUPred3/%A.out \
@@ -163,10 +151,10 @@ echo "IUPred3 jobid: ${iupred3_jobid}"
 
 mkdir -p ${wd}/log/characteristics
 characteristics_jobid=$(sbatch --parsable \
-    --mem=10G \
-    --time=1:00:00 \
+    --mem=30G \
+    --time=2:00:00 \
     --job-name=${run}.characteristics \
-    --gres=tmpspace:10G \
+    --gres=tmpspace:30G \
     --output=${wd}/log/characteristics/%A.out \
     --export=ALL \
     "${scriptdir}/characteristics/calculate_characteristics.sh")
@@ -176,7 +164,7 @@ echo "characteristics jobid: ${characteristics_jobid}"
 mkdir -p ${wd}/log/netMHCpan
 netMHCpan_jobid=$(sbatch --parsable \
     --mem=10G \
-    --time=1:00:00 \
+    --time=18:00:00 \
     --job-name=${run}.netMHCpan \
     --gres=tmpspace:10G \
     --output=${wd}/log/netMHCpan/%A.out \
@@ -189,19 +177,19 @@ mkdir -p ${wd}/log/ELM_search
 ELM_search_jobid=$(sbatch --dependency=afterok:${iupred3_jobid} \
     --parsable \
     --mem=10G \
-    --time=1:00:00 \
+    --time=2:00:00 \
     --job-name=${run}.ELM_search \
     --gres=tmpspace:10G \
     --output=${wd}/log/ELM_search/%A.out \
     --export=ALL \
     "${scriptdir}/ELM_search/ELM_SLiM_search.sh")
-echo "netMHCpan jobid: ${ELM_search_jobid}"
+echo "ELM search jobid: ${ELM_search_jobid}"
 
 # Step 2: combine the results
 
-sbatch --dependency=afterok:${omegafold_jobid},${BLASTp_jobid},${deepTMHMM_jobid},${signalp6_jobid},${iupred3_jobid},${characteristics_jobid},${netMHCpan_jobid} \
+sbatch --dependency=afterok:${omegafold_jobid},${deepTMHMM_jobid},${signalp6_jobid},${iupred3_jobid},${characteristics_jobid},${netMHCpan_jobid} \
     --mem=10G \
-    --time=1:00:00 \
+    --time=2:00:00 \
     --job-name=${run}.merge_files \
     --output=${wd}/log/%A.out \
     --export=ALL \
