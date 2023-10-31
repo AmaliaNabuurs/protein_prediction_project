@@ -1,9 +1,8 @@
 # Protein prediction pipeline
 ## Introduction
-
+All code for the protein prediction pipeline is on this github. The pipeline is created to predict and calculate several characteristics of (micro)proteins. These characteristics can be important gain in insight in their potential function or localisation. The pipeline makes predictions based on amino acid sequence of the proteins, as input a fasta file with amino acid sequences is needed. Several tools are ran parallel. These tools include, BLASTp[^1], IUPred 3.0[^2], SignalP 6.0[^3], DeepTMHMM[^4], OmegaFold[^5], netMHCpan[^6], SLiM search[^7] and a R script that  predicts several characteristics as their hydophobicity, charge etc [^8].  
 
 The code for running the protein prediction pipeline can be found in the /code directory. The code is seperated per part of the pipeline.
-An example is included with the results to test the pipeline before use. 
 
 ## Before running the pipeline
 ### Important apptainer containers
@@ -42,12 +41,12 @@ The download files will also be downloaded when this git is cloned.
 ### Config file for the pipeline
 Per run the config_file.sh must be altered to represent the directories you are working in and the input fasta.
 Important things for every run: 
-    - Input fasta file
-    - Paths to the code
+- Input fasta file
+- Paths to the code
 Important things for the first time use:
-    - Check whether the apptainer images are downloaded and in the right container
-    - Check whether the downloaded files that are needed are present
-    - Test pipeline with example fasta file and check with example results
+- Check whether the apptainer images are downloaded and in the right container
+- Check whether the downloaded files that are needed are present
+- Test pipeline with example fasta file and check with example results
 
 ## Running the pipeline
 If all the files are present and checked you can simply run the pipeline with:
@@ -85,3 +84,12 @@ The column names and what is in every column:
 - Regex_Names_DP: The ELM classes that are found in the disorderd protein parts, names are from the elm_classes.tsv file.
 - Sequences_DP: The corresponding sequences that match the regex pattern of the ELM classes from the Regex_Names_DP column.
 - Regex_Count_DP: The sum of ELM classes that is found in the disorderd parts of the protein.
+
+[^1]:
+[^2]:
+[^3]:
+[^4]:
+[^5]:
+[^6]:
+[^7]:
+[^8]:
