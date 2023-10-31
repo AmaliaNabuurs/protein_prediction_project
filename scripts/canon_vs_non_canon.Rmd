@@ -1,0 +1,275 @@
+---
+title: "NBL plots canon + non canon"
+output: html_document
+date: "2023-09-14"
+---
+
+```{r setup libraries}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(VennDiagram)
+library(eulerr)
+library(venneuler)
+library(ggvenn)
+library(reshape2)
+```
+
+
+```{r load data}
+savedir = "/hpc/pmc_vanheesch/projects/Amalia/protein_prediction_project/20230623_AN_pipeline/documentation"
+overview_table <- "/hpc/pmc_vanheesch/projects/Amalia/protein_prediction_project/20230623_AN_pipeline/analysis/NBL_canon_fixed_header.tsv"
+table_psites <- "/hpc/pmc_vanheesch/projects/Amalia/protein_prediction_project/20230623_AN_pipeline/documentation/NBL_patient_seq_all_canon_19_150bp.tsv"
+```
+
+```{r create table}
+overview_table_canon <- data.table::fread(overview_table)
+table_psites_canon <- data.table::fread(table_psites)
+```
+
+```{r}
+colnames(overview_table_canon)[1] <- "orf_id"
+
+all_info_table_canon <- overview_table_canon %>%
+  left_join(., canon_orf_sequences_19_150bp, by='orf_id')
+
+canon_info_subset <- subset(all_info_table_canon, select = -c(width, sequence, names))
+```
+
+```{r}
+ggplot(canon_info_subset, aes(x = count)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "sample count", y = "Density", title = "Density Plot of sample count") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = pi_isoelectricpoint)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "pI (Isoelectric Point)", y = "Density", title = "Density Plot of Isoelectric Point") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = hydrophobicity)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Hydrophobicity", y = "Density", title = "Density Plot of Hydrophobicity") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = instability)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Instability", y = "Density", title = "Density Plot of Instability") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = mass_over_charge)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Mass Over Charge", y = "Density", title = "Density Plot of Mass Over Charge") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = psite_per_residue)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "pSite per residue", y = "Density", title = "Density Plot of p site per residue") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = length)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "length aa", y = "Density", title = "Density Plot of length") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = charge)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "charge", y = "Density", title = "Density Plot of charge") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = mean_pLDDT_OmegaFold)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "mean score OmegaFold", y = "Density", title = "Density Plot of mean pLDDT score of OmegaFold") +
+  theme_minimal() +
+  geom_vline(colour = "red", xintercept = 70)
+
+ggplot(canon_info_subset, aes(x = mean_iupred3_score)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "mean iupred3 score", y = "Density", title = "Density Plot of mean iupred3 score") +
+  theme_minimal() +
+  geom_vline(colour = "red", xintercept = 0.5)
+
+ggplot(canon_info_subset, aes(x = Number_SB)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Strong binders by netMHCpan", y = "Density", title = "Density Plot of strong binders by netMHCpan") +
+  theme_minimal()
+
+ggplot(canon_info_subset, aes(x = Number_WB)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Weak binders by netMHCpan", y = "Density", title = "Density Plot of weak binders by netMHCpan") +
+  theme_minimal()
+```
+
+overlay density plots
+```{r}
+ggplot() +
+  geom_density(aes(length, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(length, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  xlab("Length in amino acids") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(count, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(count, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(instability, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(instability, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(pi_isoelectricpoint, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(pi_isoelectricpoint, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  xlab("Iso-electricpoint") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(hydrophobicity, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(hydrophobicity, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  xlab("Hydrophobicity") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(psite_per_residue, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(psite_per_residue, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  scale_x_log10() +
+  xlab("psite per residue") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(charge, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(charge, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(Number_SB, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(Number_SB, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(Number_WB, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(Number_WB, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(mean_iupred3_score, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(mean_iupred3_score, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  geom_vline(colour = "red", xintercept = 0.5) +
+  xlab("Mean score IUPred3") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(mean_pLDDT_OmegaFold, fill = "canonical"), alpha = .4, data = canon_info_subset) +
+  geom_density(aes(mean_pLDDT_OmegaFold, fill = "noncanonical"), alpha = .4, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "blue", noncanonical = "orange")) +
+  geom_vline(colour = "red", xintercept = 70) +
+  xlab("Mean pLDDT score OmegaFold") +
+  ylab("Density") +
+  theme_minimal()
+
+
+```
+
+```{r nice plots}
+ggplot() +
+  geom_density(aes(mean_pLDDT_OmegaFold, fill = "Canonical"), alpha = .6, data = canon_info_subset) +
+  geom_density(aes(mean_pLDDT_OmegaFold, fill = "NonCanonical"), alpha = .6, data = all_info_subset) +
+  scale_fill_manual(name = "Dataset", values = c(Canonical = "blue", NonCanonical = "red")) +
+  geom_vline(colour = "red", xintercept = 70) + 
+  xlab("Mean pLDDT score OmegaFold") +
+  ylab("Density") +
+  theme_minimal()
+
+ggplot() +
+  geom_density(aes(length, fill = "Canonical"), alpha = .6, data = canon_info_subset) +
+  geom_density(aes(length, fill = "NonCanonical"), alpha = .6, data = all_info_subset) +
+  scale_fill_manual(name = "Dataset", values = c(Canonical = "blue", NonCanonical = "red")) +
+  xlab("Length in amino acids") +
+  ylab("Density") +
+  theme_minimal()
+```
+
+
+```{r}
+subset_non_canon <- canon_info_subset[, c("length", "hydrophobicity","pi_isoelectricpoint","mean_pLDDT_OmegaFold","mean_iupred3_score","Regex_Count_DP","Number_SB")]
+
+summary_table <- data.frame(
+  Mean_Value = sapply(subset_non_canon, mean),
+  Standard_Deviation = sapply(subset_non_canon, sd),
+  Range = sapply(subset_non_canon, function(x) max(x) - min(x))
+)
+```
+
+```{r}
+ggplot() +
+  geom_density(aes(psite_per_residue, fill = "canonical"), alpha = .2, data = canon_info_subset) +
+  geom_density(aes(psite_per_residue, fill = "noncanonical"), alpha = .2, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "red", noncanonical = "blue")) +
+  scale_x_log10()
+
+ggplot() +
+  geom_density(aes(psite_per_residue, fill = "canonical"), alpha = .2, data = canon_info_subset) +
+  geom_density(aes(psite_per_residue, fill = "noncanonical"), alpha = .2, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "red", noncanonical = "blue")) 
+
+ggplot() +
+  geom_density(aes(psite_per_residue, fill = "canonical"), alpha = .2, data = canon_info_subset) +
+  geom_density(aes(psite_per_residue, fill = "noncanonical"), alpha = .2, data = all_info_subset) +
+  scale_fill_manual(name = "dataset", values = c(canonical = "red", noncanonical = "blue")) +
+  scale_x_continuous(limits = c(0, 10))
+```
+
+```{r venn diagram}
+
+# Create a subset of your dataframe where "SP" is present in either column
+subset_signal_peptides <- all_info_subset[all_info_subset$signalP_result == "SP" | all_info_subset$DeepTMHMM_prediction == "SP", ]
+
+# Calculate the counts for "SP" in each column
+count_sp_in_signalP <- sum(all_info_subset$signalP_result == "SP")
+count_sp_in_deepTMHMM <- sum(all_info_subset$DeepTMHMM_prediction == "SP")
+count_both_sp <- sum(all_info_subset$signalP_result == "SP" & all_info_subset$DeepTMHMM_prediction == "SP")
+
+# Plot the Venn diagram
+draw.pairwise.venn(area1 = 56, area2 = 382, cross.area = 49, category = c("signalP, deepTMHMM"), fill = c("red","blue"))
+
+SP <- list("SignalP" = all_info_subset$signalP_result, "DeepTMHMM" = all_info_subset$DeepTMHMM_prediction)
+
+ggvenn(lapply(SP, function(x) which(x == "SP")))
+
+SP_canon <- list("SignalP" = canon_info_subset$signalP_result, "DeepTMHMM" = canon_info_subset$DeepTMHMM_prediction)
+
+ggvenn(lapply(SP_canon, function(x) which(x == "SP")))
+
+SP_NBL_enriched <- list("SignalP" = NBL_enriched$signalP_result, "DeepTMHMM" = NBL_enriched$DeepTMHMM_prediction)
+ggvenn(lapply(SP_NBL_enriched, function(x) which(x == "SP")))
+
+```
+
+
+```{r}
+ven_canon <- euler(c(SignalP = 21, DeepTMHMM = 152, "SignalP&DeepTMHMM" = 174))
+plot(ven_canon, quantities = TRUE)
+
+ven_noncanon <- euler(c(SignalP = 7, DeepTMHMM = 333, "SignalP&DeepTMHMM" = 49))
+plot(ven_noncanon, quantities = TRUE, key = TRUE)
+
+venn_NBL_enriched <- euler(c(SignalP = 0, DeepTMHMM = 4, "SignalP&DeepTMHMM" = 1))
+plot(venn_NBL_enriched, quantities = TRUE)
+```
+
