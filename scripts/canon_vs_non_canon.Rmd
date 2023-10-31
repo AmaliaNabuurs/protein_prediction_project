@@ -3,6 +3,7 @@ title: "NBL plots canon + non canon"
 output: html_document
 date: "2023-09-14"
 ---
+The create_orf_subset.Rmd needs to run beforehand
 
 ```{r setup libraries}
 library(ggplot2)
