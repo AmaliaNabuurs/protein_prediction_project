@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH --time=01:00:00      
+#SBATCH --time=04:00:00      
 #SBATCH --gres=tmpspace:1G      
 #SBATCH --mem=1G     
 
@@ -29,7 +29,7 @@ sed '1i qseqid  sseqid  pident  length  mismatch    gapopen qstart  qend    ssta
 
 # script to iterate over results to find proteins that do have and that do not have results
 
-apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch /hpc/local/Rocky8/pmc_vanheesch/singularity_images/blast_parser_python-1.0.sif \
+apptainer exec -B /hpc/pmc_vanheesch:/hpc/pmc_vanheesch /hpc/local/Rocky8/pmc_vanheesch/singularity_images/blast_parser_python-2.0.sif \
     python3 /app/blastout_to_list.py \
         -b $2 \
         -f $1 \
