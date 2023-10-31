@@ -1,13 +1,12 @@
 # Protein prediction pipeline
 ## Introduction
-All code for the protein prediction pipeline is on this github. The pipeline is created to predict and calculate several characteristics of (micro)proteins. These characteristics can be important gain in insight in their potential function or localisation. The pipeline makes predictions based on amino acid sequence of the proteins, as input a fasta file with amino acid sequences is needed. Several tools are ran parallel. These tools include, BLASTp[^1], IUPred 3.0[^2], SignalP 6.0[^3], DeepTMHMM[^4], OmegaFold[^5], netMHCpan[^6], SLiM search[^7] and a R script that  predicts several characteristics as their hydophobicity, charge etc [^8].  
+All code for the protein prediction pipeline is on this github. The pipeline is created to predict and calculate several characteristics of (micro)proteins. These characteristics can be important gain in insight in their potential function or localisation. The pipeline makes predictions based on amino acid sequence of the proteins, as input a fasta file with amino acid sequences is needed. Several tools are ran parallel. These tools include IUPred 3.0[^1], SignalP 6.0[^2], DeepTMHMM[^3], OmegaFold[^4], netMHCpan[^5], SLiM search and a R script that  predicts several characteristics as their hydophobicity, charge etc [^6].  
 
 The code for running the protein prediction pipeline can be found in the /code directory. The code is seperated per part of the pipeline.
 
 ## Before running the pipeline
 ### Important apptainer containers
 Containers that are needed for the pipeline with corresponding docker links:
-- ncbi BLAST container
 - signalP container
 - deepTMHMM container
 - OmegaFold container
@@ -85,11 +84,9 @@ The column names and what is in every column:
 - Sequences_DP: The corresponding sequences that match the regex pattern of the ELM classes from the Regex_Names_DP column.
 - Regex_Count_DP: The sum of ELM classes that is found in the disorderd parts of the protein.
 
-[^1]:
-[^2]:
-[^3]:
-[^4]:
-[^5]:
-[^6]:
-[^7]:
-[^8]:
+[^1]: https://doi.org/10.1093%2Fnar%2Fgkab408
+[^2]: https://doi.org/10.1038%2Fs41587-021-01156-3
+[^3]: https://doi.org/10.1101/2022.04.08.487609
+[^4]: https://doi.org/10.1101/2022.07.21.500999
+[^5]: https://doi.org/10.1093/nar/gkaa379
+[^6]: https://github.com/dosorio/Peptides/
