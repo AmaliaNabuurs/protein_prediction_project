@@ -33,7 +33,7 @@ Download files that are needed for the pipeline:
     - Weights file can also be found under /data/raw/model-2.pt
 - ELM classes file in tsv format
     - Version used for the report can be found on github /data/raw/elm_classes.tsv and is downloaded on 
-    - Currens version can be downloaded on http://elm.eu.org/downloads.html#classes under /elms/elms_index.tsv
+    - Current version can be downloaded on http://elm.eu.org/downloads.html#classes under /elms/elms_index.tsv
 
 The download files will also be downloaded when this git is cloned.
 
